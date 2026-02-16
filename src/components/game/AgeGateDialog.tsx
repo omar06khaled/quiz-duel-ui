@@ -26,13 +26,11 @@ export const AgeGateDialog = ({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="border-border/50 bg-card">
+      <AlertDialogContent className="border-border bg-card">
         <AlertDialogHeader>
-          <AlertDialogTitle className="font-display">After Dark (18+)</AlertDialogTitle>
-          <AlertDialogDescription className="space-y-3">
-            <span className="block">
-              Adult humor / suggestive party content. You must be 18+.
-            </span>
+          <AlertDialogTitle className="font-display font-bold">After Dark (18+)</AlertDialogTitle>
+          <AlertDialogDescription>
+            Adult humor / suggestive party content. You must be 18+.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="flex items-center gap-3 px-1 py-2">
@@ -41,13 +39,13 @@ export const AgeGateDialog = ({
             checked={confirmed}
             onCheckedChange={(v) => setConfirmed(v === true)}
           />
-          <label htmlFor="age-confirm" className="text-sm text-foreground cursor-pointer">
+          <label htmlFor="age-confirm" className="cursor-pointer text-sm text-foreground">
             I confirm I am 18+
           </label>
         </div>
         <AlertDialogFooter>
           <AlertDialogCancel
-            className="border-border/50 bg-secondary text-foreground hover:bg-muted"
+            className="rounded-xl border-border bg-secondary text-foreground hover:bg-muted font-display"
             onClick={() => setConfirmed(false)}
           >
             Cancel
@@ -58,7 +56,7 @@ export const AgeGateDialog = ({
               onConfirm();
               setConfirmed(false);
             }}
-            className="bg-game-pink text-primary-foreground hover:bg-game-pink/90 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="rounded-xl bg-game-pink text-white hover:bg-game-pink/90 disabled:opacity-40 disabled:cursor-not-allowed font-display"
           >
             Confirm
           </AlertDialogAction>

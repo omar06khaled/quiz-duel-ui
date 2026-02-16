@@ -22,20 +22,20 @@ export const LeaveConfirmDialog = ({
 }: LeaveConfirmDialogProps) => {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="border-border/50 bg-card">
+      <AlertDialogContent className="border-border bg-card">
         <AlertDialogHeader>
-          <AlertDialogTitle className="font-display">Leave without scoring?</AlertDialogTitle>
+          <AlertDialogTitle className="font-display font-bold">Leave without scoring?</AlertDialogTitle>
           <AlertDialogDescription>
             This question won't be marked as answered. You can return to it later.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className="border-border/50 bg-secondary text-foreground hover:bg-muted">
+          <AlertDialogCancel className="rounded-xl border-border bg-secondary text-foreground hover:bg-muted font-display">
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
+            className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-display"
           >
             Leave
           </AlertDialogAction>
