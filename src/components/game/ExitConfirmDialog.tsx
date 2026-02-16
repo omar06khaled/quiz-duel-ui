@@ -22,20 +22,20 @@ export const ExitConfirmDialog = ({
 }: ExitConfirmDialogProps) => {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="border-border/50 bg-card">
+      <AlertDialogContent className="border-border bg-card">
         <AlertDialogHeader>
-          <AlertDialogTitle className="font-display">Exit game?</AlertDialogTitle>
+          <AlertDialogTitle className="font-display font-bold">Exit game?</AlertDialogTitle>
           <AlertDialogDescription>
             Your current game progress will be lost.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className="border-border/50 bg-secondary text-foreground hover:bg-muted">
+          <AlertDialogCancel className="rounded-xl border-border bg-secondary text-foreground hover:bg-muted font-display">
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90 font-display"
           >
             Exit
           </AlertDialogAction>

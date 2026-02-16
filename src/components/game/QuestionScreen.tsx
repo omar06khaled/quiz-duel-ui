@@ -1,5 +1,5 @@
-﻿import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, LogOut, Undo2, Eye, SkipForward, Check, X, Timer } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowLeft, LogOut, Undo2, Eye, SkipForward, Check, X, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Question } from "@/data/categories";
 import { SkipConfirmDialog } from "./SkipConfirmDialog";
@@ -60,46 +60,37 @@ export const QuestionScreen = ({
     const timer = setInterval(() => {
       setElapsedSeconds((prev) => prev + 1);
     }, 1000);
-
     return () => clearInterval(timer);
   }, []);
 
   const formattedElapsed = useMemo(() => {
-    const minutes = Math.floor(elapsedSeconds / 60)
-      .toString()
-      .padStart(2, "0");
+    const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, "0");
     const seconds = (elapsedSeconds % 60).toString().padStart(2, "0");
     return `${minutes}:${seconds}`;
   }, [elapsedSeconds]);
 
   const teamColor = currentTeam === 1 ? "text-game-team1" : "text-game-team2";
+  const teamBg = currentTeam === 1 ? "bg-game-team1/10 border-game-team1/20" : "bg-game-team2/10 border-game-team2/20";
 
   return (
-    <div className={`relative flex min-h-[100dvh] flex-col overflow-hidden px-4 py-4 sm:px-8 sm:py-5 ${feedback === "incorrect" ? "animate-shake" : ""}`}>
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(160deg,hsl(248_30%_10%)_0%,hsl(246_30%_8%)_56%,hsl(244_34%_6%)_100%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(62%_54%_at_50%_54%,hsl(var(--game-pink)/0.16)_0%,hsl(var(--game-team1)/0.09)_38%,transparent_70%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(110%_96%_at_50%_50%,transparent_46%,hsl(246_34%_4%/0.72)_100%)]" />
-      <motion.div
-        className="pointer-events-none absolute inset-0"
-        initial={{ opacity: 0.28, scale: 1 }}
-        animate={{ opacity: [0.24, 0.34, 0.24], scale: [1, 1.03, 1] }}
-        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-      >
-        <div className="h-full w-full bg-[radial-gradient(46%_40%_at_50%_56%,hsl(var(--game-pink)/0.14)_0%,transparent_72%)]" />
-      </motion.div>
+    <div className={`relative flex min-h-[100dvh] flex-col overflow-hidden ${feedback === "incorrect" ? "animate-shake" : ""}`}>
+      {/* Background */}
+      <div className="pointer-events-none absolute inset-0 bg-background" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_30%,hsl(var(--game-purple)/0.08)_0%,transparent_60%)]" />
 
-      <header className="relative z-10 mb-4 flex items-center gap-3">
+      {/* Header */}
+      <header className="relative z-10 flex items-center gap-3 px-4 py-4 sm:px-8 sm:py-5">
         <button
           onClick={handleBackClick}
-          className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+          className="rounded-xl p-2.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
 
         <div className="flex flex-1 items-center justify-center">
-          <div className="flex items-center gap-3 rounded-xl border border-white/25 bg-[linear-gradient(125deg,hsl(var(--game-team1)/0.24),hsl(var(--game-pink)/0.28),hsl(var(--game-purple)/0.22))] px-7 py-3 shadow-[0_0_20px_hsl(var(--game-pink)/0.35)]">
-            <Timer className="h-8 w-8 text-white/85" />
-            <span className="font-home-title text-4xl leading-none tracking-[0.06em] text-white">
+          <div className="glass-panel flex items-center gap-2.5 rounded-xl px-5 py-2.5">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span className="font-mono text-lg font-medium tracking-wider text-foreground">
               {formattedElapsed}
             </span>
           </div>
@@ -109,14 +100,14 @@ export const QuestionScreen = ({
           <button
             onClick={onUndo}
             disabled={!canUndo}
-            className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-30"
+            className="rounded-xl p-2.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-25"
             aria-label="Undo"
           >
             <Undo2 className="h-4 w-4" />
           </button>
           <button
             onClick={onExit}
-            className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+            className="rounded-xl p-2.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
             aria-label="Exit game"
           >
             <LogOut className="h-5 w-5" />
@@ -124,79 +115,87 @@ export const QuestionScreen = ({
         </div>
       </header>
 
-      <div className="relative z-10 mx-auto mb-4 w-full max-w-[920px] rounded-xl border border-white/18 bg-card/45 px-4 py-2.5 backdrop-blur-sm">
-        <div className="grid grid-cols-3 items-center gap-2 text-center">
-          <span className="font-home-subheading text-sm font-semibold uppercase tracking-wider text-white/90">
+      {/* Meta bar */}
+      <div className="relative z-10 mx-4 mb-4 sm:mx-auto sm:w-full sm:max-w-[800px]">
+        <div className="glass-panel flex items-center justify-between rounded-xl px-5 py-3">
+          <span className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground font-display">
             {category}
           </span>
-          <span className="font-home-subheading text-sm font-extrabold tracking-wide text-game-gold">
+          <span className="font-display text-sm font-black text-game-gold">
             {points} PTS
           </span>
-          <span className={`font-home-subheading text-sm font-semibold tracking-wide ${teamColor}`}>
+          <span className={`rounded-lg border px-3 py-1 text-xs font-bold font-display ${teamColor} ${teamBg}`}>
             Team {currentTeam}
           </span>
         </div>
       </div>
 
-      <main className="relative z-10 flex flex-1 flex-col items-center justify-center gap-6">
+      {/* Main content */}
+      <main className="relative z-10 flex flex-1 flex-col items-center justify-center gap-6 px-4 sm:px-8">
         <motion.div
-          initial={{ opacity: 0, y: 28 }}
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, ease: "easeOut" }}
-          className={`glass-surface mx-auto w-full max-w-[860px] rounded-2xl border border-white/14 bg-card/85 p-6 shadow-[0_20px_60px_-20px_hsl(248_44%_4%/0.9),0_0_28px_hsl(var(--game-pink)/0.2)] sm:p-8 lg:p-10 ${
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className={`w-full max-w-[800px] overflow-hidden rounded-2xl border border-border/50 bg-card shadow-[0_16px_48px_-12px_hsl(222_28%_4%/0.5)] ${
             feedback === "correct" ? "animate-pulse-glow" : ""
           }`}
         >
-          <div className="mb-6 overflow-hidden rounded-xl">
+          {/* Question Image */}
+          <div className="overflow-hidden">
             <img
               src={question.image}
               alt="Question"
-              className="h-[36vh] min-h-[220px] w-full object-cover sm:h-[40vh] sm:min-h-[280px]"
+              className="h-[30vh] min-h-[200px] w-full object-cover sm:h-[36vh] sm:min-h-[260px]"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = "/placeholder.svg";
               }}
             />
           </div>
 
-          <p className="text-center text-2xl font-medium leading-relaxed text-foreground sm:text-3xl font-display">
-            {question.text}
-          </p>
+          {/* Question Text */}
+          <div className="p-6 sm:p-8">
+            <p className="text-center text-xl font-semibold leading-relaxed text-foreground sm:text-2xl font-display">
+              {question.text}
+            </p>
 
-          <AnimatePresence>
-            {revealed && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mt-6 overflow-hidden"
-              >
-                <div className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center sm:p-7">
-                  <p className="mb-2 text-sm font-semibold uppercase tracking-[0.14em] text-primary/70 font-display">
-                    Answer
-                  </p>
-                  <p className="text-4xl font-black text-foreground font-display sm:text-5xl">
-                    {question.answer}
-                  </p>
-                  {question.funFact && (
-                    <p className="mt-4 text-base italic text-muted-foreground">
-                      {question.funFact}
+            {/* Answer Reveal */}
+            <AnimatePresence>
+              {revealed && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                  animate={{ opacity: 1, height: "auto", marginTop: 24 }}
+                  exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="rounded-xl border border-primary/15 bg-primary/5 p-6 text-center">
+                    <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-primary/50 font-display">
+                      Answer
                     </p>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                    <p className="text-3xl font-black text-foreground font-display sm:text-4xl">
+                      {question.answer}
+                    </p>
+                    {question.funFact && (
+                      <p className="mt-3 text-sm italic text-muted-foreground">
+                        {question.funFact}
+                      </p>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </motion.div>
 
+        {/* Feedback Icon */}
         <AnimatePresence>
           {feedback === "correct" && (
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0 }}
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-game-correct"
+              className="flex h-14 w-14 items-center justify-center rounded-full bg-game-correct shadow-[0_0_24px_hsl(var(--game-correct)/0.4)]"
             >
-              <Check className="h-6 w-6 text-foreground" />
+              <Check className="h-7 w-7 text-white" />
             </motion.div>
           )}
           {feedback === "incorrect" && (
@@ -204,29 +203,30 @@ export const QuestionScreen = ({
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0 }}
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-game-incorrect"
+              className="flex h-14 w-14 items-center justify-center rounded-full bg-game-incorrect shadow-[0_0_24px_hsl(var(--game-incorrect)/0.4)]"
             >
-              <X className="h-6 w-6 text-foreground" />
+              <X className="h-7 w-7 text-white" />
             </motion.div>
           )}
         </AnimatePresence>
       </main>
 
-      <footer className="relative z-10 mt-5 flex items-center justify-center gap-3 sm:mt-7">
+      {/* Action Footer */}
+      <footer className="relative z-10 flex items-center justify-center gap-3 px-4 py-6 sm:py-8">
         {!revealed ? (
           <>
             <motion.button
-              whileTap={{ scale: 0.98 }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => setRevealed(true)}
-              className="flex items-center gap-2 rounded-xl bg-[linear-gradient(125deg,hsl(var(--game-team1)),hsl(var(--game-pink))_58%,hsl(var(--game-purple)))] px-10 py-4 text-lg font-bold text-white font-display shadow-[0_0_18px_hsl(var(--game-pink)/0.4)] transition-all hover:brightness-110 hover:shadow-[0_0_26px_hsl(var(--game-pink)/0.58)]"
+              className="flex items-center gap-2.5 rounded-2xl gradient-cta px-10 py-4 text-base font-bold text-white font-display shadow-[0_0_20px_-4px_hsl(var(--primary)/0.3)] transition-all hover:shadow-[0_0_28px_-4px_hsl(var(--primary)/0.4)] hover:brightness-110"
             >
-              <Eye className="h-4 w-4" />
+              <Eye className="h-5 w-5" />
               Reveal Answer
             </motion.button>
             <motion.button
-              whileTap={{ scale: 0.98 }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => setShowSkipDialog(true)}
-              className="flex items-center gap-2 rounded-xl border border-white/20 bg-card/50 px-8 py-4 text-lg font-semibold text-white/78 font-display transition-colors hover:bg-card/65 hover:text-white"
+              className="glass-panel flex items-center gap-2 rounded-2xl px-7 py-4 text-base font-semibold text-muted-foreground font-display transition-colors hover:text-foreground"
             >
               <SkipForward className="h-4 w-4" />
               Skip
@@ -235,17 +235,19 @@ export const QuestionScreen = ({
         ) : feedback === null ? (
           <>
             <motion.button
-              whileTap={{ scale: 0.98 }}
+              whileTap={{ scale: 0.97 }}
               onClick={handleCorrect}
-              className="rounded-xl bg-game-correct px-10 py-4 text-lg font-bold text-foreground font-display transition-all hover:brightness-110"
+              className="flex items-center gap-2 rounded-2xl bg-game-correct px-10 py-4 text-base font-bold text-white font-display shadow-[0_0_20px_-4px_hsl(var(--game-correct)/0.3)] transition-all hover:brightness-110"
             >
+              <Check className="h-5 w-5" />
               Correct
             </motion.button>
             <motion.button
-              whileTap={{ scale: 0.98 }}
+              whileTap={{ scale: 0.97 }}
               onClick={handleIncorrect}
-              className="rounded-xl bg-game-incorrect px-10 py-4 text-lg font-bold text-foreground font-display transition-all hover:brightness-110"
+              className="flex items-center gap-2 rounded-2xl bg-game-incorrect px-10 py-4 text-base font-bold text-white font-display shadow-[0_0_20px_-4px_hsl(var(--game-incorrect)/0.3)] transition-all hover:brightness-110"
             >
+              <X className="h-5 w-5" />
               Incorrect
             </motion.button>
           </>

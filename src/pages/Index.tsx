@@ -39,9 +39,9 @@ const deepCopyTiles = (tiles: TileState[][]): TileState[][] =>
   tiles.map((col) => col.map((t) => ({ ...t })));
 
 const pageVariants = {
-  initial: { opacity: 0, y: 16 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.3 } },
-  exit: { opacity: 0, y: -16, transition: { duration: 0.2 } },
+  initial: { opacity: 0, scale: 0.98 },
+  animate: { opacity: 1, scale: 1, transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] as const } },
+  exit: { opacity: 0, scale: 0.98, transition: { duration: 0.2 } },
 };
 
 const Index = () => {
@@ -176,7 +176,6 @@ const Index = () => {
     setActiveTile(null);
     setActiveQuestion(null);
 
-    // Check if all tiles used
     setTiles((prev) => {
       const allUsed = prev.every((col) =>
         col.every(

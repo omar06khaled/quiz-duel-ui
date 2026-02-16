@@ -1,4 +1,4 @@
-﻿import { LogOut, Undo2 } from "lucide-react";
+import { LogOut, Undo2 } from "lucide-react";
 import { TileState } from "@/pages/Index";
 import { PointTile } from "./PointTile";
 import { motion } from "framer-motion";
@@ -36,29 +36,32 @@ export const GameBoard = ({
   allowScoreEdits,
 }: GameBoardProps) => {
   return (
-    <div className="board-arcade-bg flex min-h-[100dvh] flex-col px-3 py-0.5 pb-[120px] sm:px-5 sm:py-1.5 md:px-8 md:py-1.5">
-      <header className="mb-1 flex items-center justify-between gap-3 sm:mb-1.5">
-        <div
-          className={`team-turn-indicator rounded-full px-4 py-1.5 text-sm font-semibold font-display transition-colors ${
+    <div className="board-bg flex min-h-[100dvh] flex-col px-3 py-2 pb-[130px] sm:px-6 sm:py-3 md:px-8">
+      {/* Header */}
+      <header className="mb-3 flex items-center justify-between gap-3 sm:mb-4">
+        <motion.div
+          initial={{ opacity: 0, x: -12 }}
+          animate={{ opacity: 1, x: 0 }}
+          className={`team-turn-indicator rounded-xl px-5 py-2.5 text-sm font-bold font-display transition-colors ${
             currentTeam === 1
-              ? "team-turn-team1 bg-game-team1/15 text-game-team1 ring-1 ring-game-team1/30"
-              : "team-turn-team2 bg-game-team2/15 text-game-team2 ring-1 ring-game-team2/30"
+              ? "team-turn-team1 bg-game-team1/10 text-game-team1 border border-game-team1/25"
+              : "team-turn-team2 bg-game-team2/10 text-game-team2 border border-game-team2/25"
           }`}
         >
           Team {currentTeam}'s Turn
-        </div>
+        </motion.div>
         <div className="flex items-center gap-1">
           <button
             onClick={onUndo}
             disabled={!canUndo}
-            className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-30"
+            className="rounded-xl p-2.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-25"
             aria-label="Undo last action"
           >
             <Undo2 className="h-5 w-5" />
           </button>
           <button
             onClick={onExit}
-            className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+            className="rounded-xl p-2.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
             aria-label="Exit game"
           >
             <LogOut className="h-5 w-5" />
@@ -66,34 +69,42 @@ export const GameBoard = ({
         </div>
       </header>
 
+      {/* Board */}
       <main className="flex flex-1 items-start justify-center">
-        <section className="board-arena-frame w-full max-w-[1560px]">
-          <div className="grid grid-cols-3 gap-5 md:gap-8">
+        <section className="board-arena-frame w-full max-w-[1400px]">
+          <div className="grid grid-cols-3 gap-4 md:gap-6">
             {categories.map((category, categoryIndex) => (
-                <div key={category.name} className="flex flex-col gap-3 md:gap-4">
-                  <div className="tileHeaderInteractive glass-surface flex h-30 flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border border-border/50 px-2 md:h-36">
-                    <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg md:h-16 md:w-16">
-                      <img
-                        src={category.image}
-                        alt={category.name}
-                        className="h-full w-full object-cover"
+              <div key={category.name} className="flex flex-col gap-3 md:gap-4">
+                {/* Category Header */}
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: categoryIndex * 0.1 }}
+                  className="category-header-card flex h-28 flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl px-3 md:h-32"
+                >
+                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-border/30 md:h-14 md:w-14">
+                    <img
+                      src={category.image}
+                      alt={category.name}
+                      className="h-full w-full object-cover"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "/placeholder.svg";
                       }}
                     />
                   </div>
-                    <span className="px-1 text-center text-xs font-semibold uppercase leading-tight tracking-wider text-primary font-display sm:text-sm">
-                      {category.name}
-                    </span>
-                  </div>
+                  <span className="px-1 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground font-display sm:text-xs">
+                    {category.name}
+                  </span>
+                </motion.div>
 
+                {/* Point Tiles */}
                 {points.map((pointValue, pointIndex) => (
                   <PointTile
                     key={pointValue}
                     points={pointValue}
                     disabled={tiles[categoryIndex][pointIndex].used}
                     onClick={() => onTileClick(categoryIndex, pointIndex)}
-                    delay={categoryIndex * 0.08 + pointIndex * 0.08}
+                    delay={categoryIndex * 0.06 + pointIndex * 0.06}
                   />
                 ))}
               </div>
@@ -102,7 +113,8 @@ export const GameBoard = ({
         </section>
       </main>
 
-      <footer className="fixed bottom-5 left-0 right-0 z-50 flex justify-center gap-6 px-3">
+      {/* Score Footer */}
+      <footer className="fixed bottom-5 left-0 right-0 z-50 flex justify-center gap-4 px-3 sm:gap-6">
         <ScorePill team={1} score={scores.team1} active={currentTeam === 1} onAdjust={onScoreAdjust} allowEdits={allowScoreEdits} />
         <ScorePill team={2} score={scores.team2} active={currentTeam === 2} onAdjust={onScoreAdjust} allowEdits={allowScoreEdits} />
       </footer>
@@ -119,46 +131,41 @@ interface ScorePillProps {
 }
 
 const ScorePill = ({ team, score, active, onAdjust, allowEdits }: ScorePillProps) => {
-  const teamTextClass = team === 1 ? "text-game-team1" : "text-game-team2";
-  const teamPanelClass =
-    team === 1
-      ? "border-game-team1/50 shadow-[0_0_14px_hsl(var(--game-team1)/0.28)]"
-      : "border-game-team2/50 shadow-[0_0_14px_hsl(var(--game-team2)/0.28)]";
-  const activeClass =
-    team === 1
-      ? "scale-[1.08] opacity-100 border-game-team1/70 score-pill-ring-glow score-pill-ring-team1 shadow-[0_0_24px_hsl(var(--game-team1)/0.55)]"
-      : "scale-[1.08] opacity-100 border-game-team2/70 score-pill-ring-glow score-pill-ring-team2 shadow-[0_0_24px_hsl(var(--game-team2)/0.55)]";
-  const inactiveClass = "scale-100 opacity-80";
+  const teamClass = team === 1 ? "score-pill-team1" : "score-pill-team2";
+  const labelColor = team === 1 ? "text-game-team1" : "text-game-team2";
+  const scoreColor = team === 1 ? "score-number-team1" : "score-number-team2";
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`score-pill-shadow ${teamPanelClass} ${active ? activeClass : inactiveClass} flex min-w-[210px] items-center justify-center gap-3 rounded-2xl border bg-card/95 px-5 py-3 transition-all duration-200 ease-in-out ${
-        active ? "" : "border-border/50"
-      }`}
+      transition={{ delay: team * 0.1 }}
+      className={`glass-panel ${teamClass} ${
+        active ? "score-pill-active scale-[1.05]" : "opacity-70 scale-100"
+      } flex min-w-[190px] items-center justify-center gap-3 rounded-2xl px-5 py-3.5 transition-all duration-300 sm:min-w-[220px]`}
     >
-      <span className={`text-sm font-semibold font-display ${teamTextClass}`}>
-        Team {team}
-      </span>
-
-      <span className={`text-4xl tabular-nums text-foreground font-display ${active ? "font-black" : "font-extrabold"} ${team === 1 ? "score-number-team1" : "score-number-team2"}`}>
-        {score.toLocaleString()}
-      </span>
+      <div className="flex flex-col items-center">
+        <span className={`text-[10px] font-bold uppercase tracking-[0.15em] font-display ${labelColor}`}>
+          Team {team}
+        </span>
+        <span className={`font-display text-3xl font-black tabular-nums sm:text-4xl ${scoreColor}`}>
+          {score.toLocaleString()}
+        </span>
+      </div>
 
       {allowEdits && (
-        <div className="flex items-center gap-1.5">
-          <button
-            onClick={() => onAdjust(team, -100)}
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-base font-bold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:scale-95"
-          >
-            -
-          </button>
+        <div className="flex flex-col gap-0.5">
           <button
             onClick={() => onAdjust(team, 100)}
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-base font-bold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:scale-95"
+            className="flex h-6 w-6 items-center justify-center rounded-md text-xs font-bold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:scale-90"
           >
             +
+          </button>
+          <button
+            onClick={() => onAdjust(team, -100)}
+            className="flex h-6 w-6 items-center justify-center rounded-md text-xs font-bold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:scale-90"
+          >
+            −
           </button>
         </div>
       )}
