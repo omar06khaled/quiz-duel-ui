@@ -1,73 +1,55 @@
-# Welcome to your Lovable project
+# Quiz Duel UI
 
-## Project info
+A Jeopardy-style team quiz game built with React, TypeScript, Vite, and Supabase-backed content.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Tech Stack
 
-## How can I edit this code?
+- React 18
+- TypeScript
+- Vite
+- Tailwind CSS
+- shadcn/ui
+- Framer Motion
+- Supabase
 
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## Local Development
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Create a `.env` file from `.env.example` before running the live content flow.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Supabase Setup
 
-**Use GitHub Codespaces**
+Add these values to `.env`:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```env
+VITE_SUPABASE_URL=your_project_url
+VITE_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+SUPABASE_SEED_USER_EMAIL=you@example.com
+```
 
-## What technologies are used for this project?
+Use the service-role key only for the seed script, never in the browser app.
 
-This project is built with:
+## Seed Legacy Questions
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+After your Supabase schema is ready and your admin user exists, import the current hardcoded question bank:
 
-## How can I deploy this project?
+```sh
+npm run seed:supabase
+```
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+This script reads `src/data/categories.ts` and upserts the legacy categories and questions into Supabase as approved content.
 
-## Can I connect a custom domain to my Lovable project?
+## Scripts
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- `npm run dev`: start local development server
+- `npm run build`: create production build
+- `npm run preview`: preview production build locally
+- `npm run lint`: run ESLint
+- `npm run seed:supabase`: import the legacy question bank into Supabase
+- `npm run test`: run tests once
+- `npm run test:watch`: run tests in watch mode

@@ -22,20 +22,20 @@ export const SkipConfirmDialog = ({
 }: SkipConfirmDialogProps) => {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="border-border bg-card">
+      <AlertDialogContent className="glass-panel-strong border-border/50 bg-card/40">
         <AlertDialogHeader>
-          <AlertDialogTitle className="font-display font-bold">Skip this question?</AlertDialogTitle>
+          <AlertDialogTitle className="font-display">Skip this question?</AlertDialogTitle>
           <AlertDialogDescription>
             The tile will remain unused and can be selected again later.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className="rounded-xl border-border bg-secondary text-foreground hover:bg-muted font-display">
+          <AlertDialogCancel className="glass-action border-border/50 bg-secondary/40 text-foreground hover:bg-muted/40">
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
-            className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-display"
+            className="glass-action-primary"
           >
             Skip
           </AlertDialogAction>

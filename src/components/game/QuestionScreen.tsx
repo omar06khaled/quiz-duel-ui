@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, LogOut, Undo2, Eye, SkipForward, Check, X, Clock } from "lucide-react";
+import { ArrowLeft, LogOut, Undo2, Eye, SkipForward, Check, X, Timer } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Question } from "@/data/categories";
+import { type PlayableQuestion } from "@/lib/content";
 import { SkipConfirmDialog } from "./SkipConfirmDialog";
 import { LeaveConfirmDialog } from "./LeaveConfirmDialog";
 
 interface QuestionScreenProps {
   category: string;
   points: number;
-  question: Question;
+  question: PlayableQuestion;
   currentTeam: 1 | 2;
   onCorrect: () => void;
   onIncorrect: () => void;
@@ -60,37 +60,43 @@ export const QuestionScreen = ({
     const timer = setInterval(() => {
       setElapsedSeconds((prev) => prev + 1);
     }, 1000);
+
     return () => clearInterval(timer);
   }, []);
 
   const formattedElapsed = useMemo(() => {
-    const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, "0");
+    const minutes = Math.floor(elapsedSeconds / 60)
+      .toString()
+      .padStart(2, "0");
     const seconds = (elapsedSeconds % 60).toString().padStart(2, "0");
     return `${minutes}:${seconds}`;
   }, [elapsedSeconds]);
 
   const teamColor = currentTeam === 1 ? "text-game-team1" : "text-game-team2";
-  const teamBg = currentTeam === 1 ? "bg-game-team1/10 border-game-team1/20" : "bg-game-team2/10 border-game-team2/20";
 
   return (
-    <div className={`relative flex min-h-[100dvh] flex-col overflow-hidden ${feedback === "incorrect" ? "animate-shake" : ""}`}>
-      {/* Background */}
-      <div className="pointer-events-none absolute inset-0 bg-background" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_30%,hsl(var(--game-purple)/0.08)_0%,transparent_60%)]" />
+    <div className={`glass-page-bg relative flex min-h-[100dvh] flex-col overflow-hidden px-4 py-4 sm:px-8 sm:py-5 ${feedback === "incorrect" ? "animate-shake" : ""}`}>
+      <motion.div
+        className="pointer-events-none absolute inset-0"
+        initial={{ opacity: 0.28, scale: 1 }}
+        animate={{ opacity: [0.24, 0.34, 0.24], scale: [1, 1.03, 1] }}
+        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <div className="h-full w-full bg-[radial-gradient(46%_40%_at_50%_56%,hsl(var(--game-team1)/0.1)_0%,transparent_72%)]" />
+      </motion.div>
 
-      {/* Header */}
-      <header className="relative z-10 flex items-center gap-3 px-4 py-4 sm:px-8 sm:py-5">
+      <header className="relative z-10 mb-4 flex items-center gap-3">
         <button
           onClick={handleBackClick}
-          className="rounded-xl p-2.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+          className="glass-action rounded-lg p-2 text-white/70"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
 
         <div className="flex flex-1 items-center justify-center">
-          <div className="glass-panel flex items-center gap-2.5 rounded-xl px-5 py-2.5">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <span className="font-mono text-lg font-medium tracking-wider text-foreground">
+          <div className="glass-panel-strong glass-border-glow flex items-center gap-3 rounded-xl px-7 py-3">
+            <Timer className="h-8 w-8 text-white/85" />
+            <span className="font-home-title text-4xl leading-none tracking-[0.06em] text-white">
               {formattedElapsed}
             </span>
           </div>
@@ -100,14 +106,14 @@ export const QuestionScreen = ({
           <button
             onClick={onUndo}
             disabled={!canUndo}
-            className="rounded-xl p-2.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-25"
+            className="glass-action rounded-lg p-2 text-white/70 disabled:opacity-30"
             aria-label="Undo"
           >
             <Undo2 className="h-4 w-4" />
           </button>
           <button
             onClick={onExit}
-            className="rounded-xl p-2.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+            className="glass-action rounded-lg p-2 text-white/70"
             aria-label="Exit game"
           >
             <LogOut className="h-5 w-5" />
@@ -115,87 +121,87 @@ export const QuestionScreen = ({
         </div>
       </header>
 
-      {/* Meta bar */}
-      <div className="relative z-10 mx-4 mb-4 sm:mx-auto sm:w-full sm:max-w-[800px]">
-        <div className="glass-panel flex items-center justify-between rounded-xl px-5 py-3">
-          <span className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground font-display">
+      <div className="glass-panel relative z-10 mx-auto mb-4 w-full max-w-[920px] rounded-xl px-4 py-2.5">
+        <div className="grid grid-cols-3 items-center gap-2 text-center">
+          <span className="font-home-subheading text-sm font-semibold uppercase tracking-wider text-white/90">
             {category}
           </span>
-          <span className="font-display text-sm font-black text-game-gold">
+          <span className="font-home-subheading text-sm font-extrabold tracking-wide text-game-gold">
             {points} PTS
           </span>
-          <span className={`rounded-lg border px-3 py-1 text-xs font-bold font-display ${teamColor} ${teamBg}`}>
+          <span className={`font-home-subheading text-sm font-semibold tracking-wide ${teamColor}`}>
             Team {currentTeam}
           </span>
         </div>
       </div>
 
-      {/* Main content */}
-      <main className="relative z-10 flex flex-1 flex-col items-center justify-center gap-6 px-4 sm:px-8">
+      <main className="relative z-10 flex flex-1 flex-col items-center justify-center gap-6">
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className={`w-full max-w-[800px] overflow-hidden rounded-2xl border border-border/50 bg-card shadow-[0_16px_48px_-12px_hsl(222_28%_4%/0.5)] ${
+          transition={{ duration: 0.45, ease: "easeOut" }}
+          className={`glass-panel-strong mx-auto w-full max-w-[860px] rounded-2xl p-6 sm:p-8 lg:p-10 ${
             feedback === "correct" ? "animate-pulse-glow" : ""
           }`}
         >
-          {/* Question Image */}
-          <div className="overflow-hidden">
+          <div className="mb-6 overflow-hidden rounded-xl">
             <img
               src={question.image}
               alt="Question"
-              className="h-[30vh] min-h-[200px] w-full object-cover sm:h-[36vh] sm:min-h-[260px]"
+              className="h-[36vh] min-h-[220px] w-full object-cover sm:h-[40vh] sm:min-h-[280px]"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = "/placeholder.svg";
               }}
             />
           </div>
 
-          {/* Question Text */}
-          <div className="p-6 sm:p-8">
-            <p className="text-center text-xl font-semibold leading-relaxed text-foreground sm:text-2xl font-display">
-              {question.text}
-            </p>
+          <p
+            dir="auto"
+            style={{ unicodeBidi: "plaintext" }}
+            className="text-center text-2xl font-medium leading-relaxed text-foreground sm:text-3xl font-display"
+          >
+            {question.text}
+          </p>
 
-            {/* Answer Reveal */}
-            <AnimatePresence>
-              {revealed && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                  animate={{ opacity: 1, height: "auto", marginTop: 24 }}
-                  exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="rounded-xl border border-primary/15 bg-primary/5 p-6 text-center">
-                    <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-primary/50 font-display">
-                      Answer
+          <AnimatePresence>
+            {revealed && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-6 overflow-hidden"
+              >
+                <div className="glass-panel rounded-xl p-6 text-center sm:p-7">
+                  <p className="mb-2 text-sm font-semibold uppercase tracking-[0.14em] text-primary/70 font-display">
+                    Answer
+                  </p>
+                  <p
+                    dir="auto"
+                    style={{ unicodeBidi: "plaintext" }}
+                    className="text-4xl font-black text-foreground font-display sm:text-5xl"
+                  >
+                    {question.answer}
+                  </p>
+                  {question.funFact && (
+                    <p className="mt-4 text-base italic text-muted-foreground">
+                      {question.funFact}
                     </p>
-                    <p className="text-3xl font-black text-foreground font-display sm:text-4xl">
-                      {question.answer}
-                    </p>
-                    {question.funFact && (
-                      <p className="mt-3 text-sm italic text-muted-foreground">
-                        {question.funFact}
-                      </p>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
 
-        {/* Feedback Icon */}
         <AnimatePresence>
           {feedback === "correct" && (
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0 }}
-              className="flex h-14 w-14 items-center justify-center rounded-full bg-game-correct shadow-[0_0_24px_hsl(var(--game-correct)/0.4)]"
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-game-correct"
             >
-              <Check className="h-7 w-7 text-white" />
+              <Check className="h-6 w-6 text-foreground" />
             </motion.div>
           )}
           {feedback === "incorrect" && (
@@ -203,30 +209,29 @@ export const QuestionScreen = ({
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0 }}
-              className="flex h-14 w-14 items-center justify-center rounded-full bg-game-incorrect shadow-[0_0_24px_hsl(var(--game-incorrect)/0.4)]"
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-game-incorrect"
             >
-              <X className="h-7 w-7 text-white" />
+              <X className="h-6 w-6 text-foreground" />
             </motion.div>
           )}
         </AnimatePresence>
       </main>
 
-      {/* Action Footer */}
-      <footer className="relative z-10 flex items-center justify-center gap-3 px-4 py-6 sm:py-8">
+      <footer className="relative z-10 mt-5 flex items-center justify-center gap-3 sm:mt-7">
         {!revealed ? (
           <>
             <motion.button
-              whileTap={{ scale: 0.97 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setRevealed(true)}
-              className="flex items-center gap-2.5 rounded-2xl gradient-cta px-10 py-4 text-base font-bold text-white font-display shadow-[0_0_20px_-4px_hsl(var(--primary)/0.3)] transition-all hover:shadow-[0_0_28px_-4px_hsl(var(--primary)/0.4)] hover:brightness-110"
+              className="glass-action-primary flex items-center gap-2 rounded-xl px-10 py-4 text-lg font-bold text-white font-display"
             >
-              <Eye className="h-5 w-5" />
+              <Eye className="h-4 w-4" />
               Reveal Answer
             </motion.button>
             <motion.button
-              whileTap={{ scale: 0.97 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setShowSkipDialog(true)}
-              className="glass-panel flex items-center gap-2 rounded-2xl px-7 py-4 text-base font-semibold text-muted-foreground font-display transition-colors hover:text-foreground"
+              className="glass-action flex items-center gap-2 rounded-xl px-8 py-4 text-lg font-semibold text-white/78 font-display hover:text-white"
             >
               <SkipForward className="h-4 w-4" />
               Skip
@@ -235,19 +240,17 @@ export const QuestionScreen = ({
         ) : feedback === null ? (
           <>
             <motion.button
-              whileTap={{ scale: 0.97 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleCorrect}
-              className="flex items-center gap-2 rounded-2xl bg-game-correct px-10 py-4 text-base font-bold text-white font-display shadow-[0_0_20px_-4px_hsl(var(--game-correct)/0.3)] transition-all hover:brightness-110"
+              className="glass-action-primary rounded-xl border-game-correct/50 bg-game-correct/55 px-10 py-4 text-lg font-bold text-foreground font-display transition-all hover:brightness-110"
             >
-              <Check className="h-5 w-5" />
               Correct
             </motion.button>
             <motion.button
-              whileTap={{ scale: 0.97 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleIncorrect}
-              className="flex items-center gap-2 rounded-2xl bg-game-incorrect px-10 py-4 text-base font-bold text-white font-display shadow-[0_0_20px_-4px_hsl(var(--game-incorrect)/0.3)] transition-all hover:brightness-110"
+              className="glass-action rounded-xl border-game-incorrect/50 bg-game-incorrect/45 px-10 py-4 text-lg font-bold text-foreground font-display transition-all hover:brightness-110"
             >
-              <X className="h-5 w-5" />
               Incorrect
             </motion.button>
           </>
@@ -274,3 +277,4 @@ export const QuestionScreen = ({
     </div>
   );
 };
+

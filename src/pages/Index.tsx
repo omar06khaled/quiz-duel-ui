@@ -5,7 +5,7 @@ import { GameBoard } from "@/components/game/GameBoard";
 import { QuestionScreen } from "@/components/game/QuestionScreen";
 import { EndScreen } from "@/components/game/EndScreen";
 import { ExitConfirmDialog } from "@/components/game/ExitConfirmDialog";
-import { Category, Question, POINTS } from "@/data/categories";
+import { POINTS, type PlayableCategory, type PlayableQuestion } from "@/lib/content";
 
 export interface TileState {
   categoryIndex: number;
@@ -26,17 +26,17 @@ interface UndoEntry {
 type Screen = "home" | "board" | "question" | "end";
 
 const initTiles = (): TileState[][] =>
-  Array.from({ length: 6 }, (_, ci) =>
-    POINTS.map((p, pi) => ({
-      categoryIndex: ci,
-      pointIndex: pi,
-      points: p,
+  Array.from({ length: 6 }, (_, categoryIndex) =>
+    POINTS.map((points, pointIndex) => ({
+      categoryIndex,
+      pointIndex,
+      points,
       used: false,
     }))
   );
 
 const deepCopyTiles = (tiles: TileState[][]): TileState[][] =>
-  tiles.map((col) => col.map((t) => ({ ...t })));
+  tiles.map((column) => column.map((tile) => ({ ...tile })));
 
 const pageVariants = {
   initial: { opacity: 0, scale: 0.98 },
@@ -46,7 +46,7 @@ const pageVariants = {
 
 const Index = () => {
   const [screen, setScreen] = useState<Screen>("home");
-  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<PlayableCategory[]>([]);
   const [gameOptions, setGameOptions] = useState<GameOptions>({
     allowScoreEdits: true,
     soundEffects: false,
@@ -59,7 +59,7 @@ const Index = () => {
   const [scores, setScores] = useState({ team1: 0, team2: 0 });
   const [tiles, setTiles] = useState<TileState[][]>(initTiles());
   const [activeTile, setActiveTile] = useState<{ categoryIndex: number; pointIndex: number } | null>(null);
-  const [activeQuestion, setActiveQuestion] = useState<Question | null>(null);
+  const [activeQuestion, setActiveQuestion] = useState<PlayableQuestion | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [incorrectCount, setIncorrectCount] = useState(0);
   const [showExitDialog, setShowExitDialog] = useState(false);
@@ -86,7 +86,12 @@ const Index = () => {
     setUndoStack((prev) => {
       if (prev.length === 0) return prev;
       const next = [...prev];
-      const entry = next.pop()!;
+      const entry = next.pop();
+
+      if (!entry) {
+        return prev;
+      }
+
       setScores(entry.prevScores);
       setCurrentTeam(entry.prevTeam);
       setTiles(entry.prevTiles);
@@ -109,14 +114,15 @@ const Index = () => {
   }, []);
 
   const pickQuestion = useCallback(
-    (categoryIndex: number, pointIndex: number): Question | null => {
-      const cat = selectedCategories[categoryIndex];
-      if (!cat) return null;
-      const pts = POINTS[pointIndex];
-      const pool = cat.questions[pts];
+    (categoryIndex: number, pointIndex: number): PlayableQuestion | null => {
+      const category = selectedCategories[categoryIndex];
+      if (!category) return null;
+
+      const points = POINTS[pointIndex];
+      const pool = category.questions[points];
       if (!pool || pool.length === 0) return null;
 
-      const available = pool.filter((q) => !usedQuestionIds.has(q.id));
+      const available = pool.filter((question) => !usedQuestionIds.has(question.id));
       const source = available.length > 0 ? available : pool;
       const picked = source[Math.floor(Math.random() * source.length)];
       setUsedQuestionIds((prev) => new Set(prev).add(picked.id));
@@ -125,17 +131,17 @@ const Index = () => {
     [selectedCategories, usedQuestionIds]
   );
 
-  const handleStartGame = (cats: Category[], opts: GameOptions) => {
-    setSelectedCategories(cats);
-    setGameOptions(opts);
+  const handleStartGame = (categories: PlayableCategory[], options: GameOptions) => {
+    setSelectedCategories(categories);
+    setGameOptions(options);
     resetGame();
     setScreen("board");
   };
 
-  const handleTileClick = (ci: number, pi: number) => {
-    const question = pickQuestion(ci, pi);
+  const handleTileClick = (categoryIndex: number, pointIndex: number) => {
+    const question = pickQuestion(categoryIndex, pointIndex);
     if (!question) return;
-    setActiveTile({ categoryIndex: ci, pointIndex: pi });
+    setActiveTile({ categoryIndex, pointIndex });
     setActiveQuestion(question);
     setScreen("question");
   };
@@ -143,52 +149,52 @@ const Index = () => {
   const handleAnswer = (correct: boolean) => {
     if (!activeTile) return;
     const { categoryIndex, pointIndex } = activeTile;
-    const pts = POINTS[pointIndex];
+    const points = POINTS[pointIndex];
 
     pushUndo();
 
     setTiles((prev) => {
-      const next = prev.map((col) => col.map((t) => ({ ...t })));
+      const next = prev.map((column) => column.map((tile) => ({ ...tile })));
       next[categoryIndex][pointIndex].used = true;
       return next;
     });
 
     if (correct) {
-      setScores((s) => {
+      setScores((prev) => {
         const key = currentTeam === 1 ? "team1" : "team2";
-        return { ...s, [key]: s[key] + pts };
+        return { ...prev, [key]: prev[key] + points };
       });
-      setCorrectCount((c) => c + 1);
+      setCorrectCount((count) => count + 1);
     } else {
-      setIncorrectCount((c) => c + 1);
+      setIncorrectCount((count) => count + 1);
       if (gameOptions.incorrectPenalty) {
-        setScores((s) => {
+        setScores((prev) => {
           const key = currentTeam === 1 ? "team1" : "team2";
-          return { ...s, [key]: s[key] - pts };
+          return { ...prev, [key]: prev[key] - points };
         });
       }
     }
 
     if (!correct || !gameOptions.keepTurnOnCorrect) {
-      setCurrentTeam((t) => (t === 1 ? 2 : 1));
+      setCurrentTeam((team) => (team === 1 ? 2 : 1));
     }
 
     setActiveTile(null);
     setActiveQuestion(null);
 
     setTiles((prev) => {
-      const allUsed = prev.every((col) =>
-        col.every(
-          (t) =>
-            t.used ||
-            (t.categoryIndex === categoryIndex && t.pointIndex === pointIndex)
+      const allUsed = prev.every((column) =>
+        column.every(
+          (tile) => tile.used || (tile.categoryIndex === categoryIndex && tile.pointIndex === pointIndex)
         )
       );
+
       if (allUsed) {
         setTimeout(() => setScreen("end"), 300);
       } else {
         setScreen("board");
       }
+
       return prev;
     });
   };
@@ -208,7 +214,7 @@ const Index = () => {
   const handleScoreAdjust = (team: 1 | 2, delta: number) => {
     pushUndo();
     const key = team === 1 ? "team1" : "team2";
-    setScores((s) => ({ ...s, [key]: s[key] + delta }));
+    setScores((prev) => ({ ...prev, [key]: prev[key] + delta }));
   };
 
   const handleExitConfirm = () => {
@@ -222,9 +228,9 @@ const Index = () => {
     setScreen("board");
   };
 
-  const categories = selectedCategories.map((c) => ({
-    name: c.name,
-    image: c.categoryImage,
+  const categories = selectedCategories.map((category) => ({
+    name: category.name,
+    image: category.categoryImage,
   }));
 
   return (
